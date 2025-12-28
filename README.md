@@ -1,6 +1,6 @@
 # s3-presign
 
-Tiny SDK for S3 presigned uploads: 
+Tiny Rust SDK for S3 presigned uploads: 
 - `presign(...)` to generate POST URLs with server-side file size limits.
 - `upload(...)` to stream files to the signed URL.
 
@@ -13,10 +13,11 @@ s3-presign = { git = "https://github.com/SeerApp/s3-presign", tag = "v0.1.0" }
 
 ## Usage
 
-```rust
-use s3_presign::{presign, upload, PresignOptions};
+### Presigning (server-side)
 
-// Generate presigned POST
+```rust
+use s3_presign::{presign, PresignOptions};
+
 let post = presign(PresignOptions {
     bucket: "my-bucket",
     bucket_url: "https://s3.amazonaws.com/my-bucket",
@@ -28,7 +29,23 @@ let post = presign(PresignOptions {
     expires_in_seconds: 3600,
 });
 
-// Upload file
+// Send post.url and post.fields to the client
+```
+
+### Uploading (client-side)
+
+```rust
+use s3_presign::{upload, PresignedPost};
+
+// Received from server
+let post = PresignedPost {
+    url: "https://s3.amazonaws.com/my-bucket".to_string(),
+    fields: vec![
+        ("key".to_string(), "uploads/file.txt".to_string()),
+        // ... other fields from server
+    ],
+};
+
 upload(&post, "/path/to/file.txt").await?;
 ```
 
