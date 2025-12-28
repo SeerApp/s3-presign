@@ -31,3 +31,23 @@ let post = presign(PresignOptions {
 // Upload file
 upload(&post, "/path/to/file.txt").await?;
 ```
+
+## CLI Example
+
+```bash
+cargo run --example upload <bucket> <file_path> [key]
+
+# Environment variables:
+#   S3_ENDPOINT   - S3 endpoint URL (default: http://localhost:9000)
+#   S3_ACCESS_KEY - Access key (default: minioadmin)
+#   S3_SECRET_KEY - Secret key (default: minioadmin)
+#   S3_REGION     - Region (default: us-east-1)
+#   S3_MAX_SIZE   - Max file size in bytes (default: 100MB)
+
+# Example with MinIO
+cargo run --example upload mybucket ./file.txt
+
+# Example with custom endpoint
+S3_ENDPOINT=https://s3.amazonaws.com S3_ACCESS_KEY=... S3_SECRET_KEY=... \
+  cargo run --example upload my-bucket ./file.txt uploads/file.txt
+```
