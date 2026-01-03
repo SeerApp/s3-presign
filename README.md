@@ -8,7 +8,7 @@ Tiny Rust SDK for S3 presigned uploads:
 
 ```toml
 [dependencies]
-s3-presign = { git = "https://github.com/SeerApp/s3-presign", tag = "v0.1.0" }
+s3-presign = { git = "ssh://git@github.com/SeerApp/s3-presign", tag = "v0.1.0" }
 ```
 
 ## Usage
