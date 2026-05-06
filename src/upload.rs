@@ -1,4 +1,6 @@
 use reqwest::multipart::{Form, Part};
+use std::sync::OnceLock;
+use std::time::Duration;
 use tokio::fs::File;
 use tokio_util::codec::{BytesCodec, FramedRead};
 
@@ -14,6 +16,25 @@ pub enum Error {
 
     #[error("Upload failed with status {status}: {body}")]
     UploadFailed { status: u16, body: String },
+}
+
+/// One process-wide client: a fresh `Client` per upload opens a new pool and hundreds of parallel
+/// uploads can overwhelm MinIO / the kernel (connection resets mid-body). A shared client reuses
+/// connections sensibly.
+fn http_client() -> &'static reqwest::Client {
+    static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
+    CLIENT.get_or_init(|| {
+        reqwest::Client::builder()
+            // S3-compatible POST is HTTP/1.1; avoid HTTP/2 edge cases with many large bodies.
+            .http1_only()
+            .pool_max_idle_per_host(128)
+            .pool_idle_timeout(Duration::from_secs(90))
+            .connect_timeout(Duration::from_secs(30))
+            .timeout(Duration::from_secs(600))
+            .tcp_keepalive(Duration::from_secs(60))
+            .build()
+            .expect("reqwest::Client::build")
+    })
 }
 
 pub async fn upload(post: &PresignedPost, file_path: &str) -> Result<(), Error> {
@@ -38,7 +59,7 @@ pub async fn upload(post: &PresignedPost, file_path: &str) -> Result<(), Error> 
 
     form = form.part("file", file_part);
 
-    let response = reqwest::Client::new()
+    let response = http_client()
         .post(&post.url)
         .multipart(form)
         .send()

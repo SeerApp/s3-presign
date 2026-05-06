@@ -1,6 +1,6 @@
 [package]
 name = "s3-presign"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Tiny SDK for S3 presigned uploads"
 license = "MIT"
