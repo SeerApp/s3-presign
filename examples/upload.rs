@@ -55,7 +55,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("POST URL: {}", post.url);
     println!("Fields: {:?}", post.fields);
 
-    upload(&post, file_path).await?;
+    let http_client = reqwest::Client::new();
+    upload(&http_client, &post, file_path).await?;
 
     println!("Done: {}/{}", bucket_url, key);
     Ok(())

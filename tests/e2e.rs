@@ -48,7 +48,8 @@ async fn test_upload_success() {
         expires_in_seconds: 3600,
     });
 
-    let result = upload(&post, temp_file.path().to_str().unwrap()).await;
+    let http_client = reqwest::Client::new();
+    let result = upload(&http_client, &post, temp_file.path().to_str().unwrap()).await;
     assert!(result.is_ok(), "Upload should succeed: {:?}", result);
 }
 
@@ -77,7 +78,8 @@ async fn test_upload_file_too_large() {
         expires_in_seconds: 3600,
     });
 
-    let result = upload(&post, temp_file.path().to_str().unwrap()).await;
+    let http_client = reqwest::Client::new();
+    let result = upload(&http_client, &post, temp_file.path().to_str().unwrap()).await;
 
     match result {
         Err(Error::UploadFailed { status, .. }) => {

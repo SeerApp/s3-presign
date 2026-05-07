@@ -16,7 +16,7 @@ pub enum Error {
     UploadFailed { status: u16, body: String },
 }
 
-pub async fn upload(post: &PresignedPost, file_path: &str) -> Result<(), Error> {
+pub async fn upload(client: &reqwest::Client, post: &PresignedPost, file_path: &str) -> Result<(), Error> {
     let file = File::open(file_path).await?;
     let file_size = file.metadata().await?.len();
     let file_name = std::path::Path::new(file_path)
@@ -38,7 +38,7 @@ pub async fn upload(post: &PresignedPost, file_path: &str) -> Result<(), Error> 
 
     form = form.part("file", file_part);
 
-    let response = reqwest::Client::new()
+    let response = client
         .post(&post.url)
         .multipart(form)
         .send()
